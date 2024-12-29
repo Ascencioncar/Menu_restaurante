@@ -186,6 +186,19 @@ h1 {
     margin-bottom: 15px;
 }
 
+.boton {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background-color: #3498db;
+    color: white;
+    cursor: pointer;
+}
+
+.boton:hover {
+    background-color: #2980b9;
+}
+
 .cart-item {
     display: flex;
     justify-content: space-between;
