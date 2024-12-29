@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú del Restaurante</title>
+    <link rel="stylesheet" href="estilos.css">
+       
+</head>
+<body>
+    <header>
+        <h1>Nuestro Menú</h1>
+        <p>Seleccione sus platos favoritos</p>
+    </header>
+
+    <div class="container">
+        <div class="mesa-selector">
+            <h2>Seleccione una Mesa</h2>
+            <div class="mesa-info">
+                <div>
+                    <button class="mesa-btn" onclick="seleccionarMesa(1)">Mesa 1</button>
+                    <button class="mesa-btn" onclick="seleccionarMesa(2)">Mesa 2</button>
+                    <button class="mesa-btn" onclick="seleccionarMesa(3)">Mesa 3</button>
+                    <button class="mesa-btn" onclick="seleccionarMesa(4)">Mesa 4</button>
+                </div>
+                <div>
+                    <input type="text" id="cliente-nombre" class="cliente-input" placeholder="Nombre del cliente" oninput="actualizarNombreCliente(this.value)">
+                </div>
+            </div>
+        </div>
+
+        <!-- [El resto del menú se mantiene igual...] -->
+        <div class="menu">
+            <div class="menu-section">
+                <h2 class="section-title">Entradas</h2>
+                <div class="menu-item" onclick="addToCart('Ensalada César', 15000)">
+                    <img src="/Assets/cesar.png" alt="Ensalada César" >
+                    <h3>Ensalada César</h3>
+                    <p>Lechuga romana fresca con aderezo César, crotones y queso parmesano</p>
+                    <span class="price">$15.000 COP</span>
+                </div>
+                <div class="menu-item" onclick="addToCart('Sopa del Día', 12000)">
+                    <img src="/api/placeholder/400/300" alt="Sopa del Día">
+                    <h3>Sopa del Día</h3>
+                    <p>Preparada con ingredientes frescos del día</p>
+                    <span class="price">$12.000 COP</span>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <h2 class="section-title">Platos Principales</h2>
+                <div class="menu-item" onclick="addToCart('Hamburguesa Clásica', 18000)">
+                    <img src="/Assets/hamburguesa.webp" alt="Hamburguesa Clásica">
+                    <h3>Hamburguesa Clásica</h3>
+                    <p>Carne de res, queso cheddar, lechuga, tomate y cebolla</p>
+                    <span class="price">$18.000 C0P</span>
+                </div>
+                <div class="menu-item" onclick="addToCart('Pasta Alfredo', 11000)">
+                    <img src="/api/placeholder/400/300" alt="Pasta Alfredo">
+                    <h3>Pasta Alfredo</h3>
+                    <p>Fettuccine en salsa cremosa con parmesano</p>
+                    <span class="price">$11.000 COP</span>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <h2 class="section-title">Postres</h2>
+                <div class="menu-item" onclick="addToCart('Tiramisú', 8500)">
+                    <img src="/api/placeholder/400/300" alt="Tiramisú">
+                    <h3>Tiramisú</h3>
+                    <p>Postre italiano tradicional con café y mascarpone</p>
+                    <span class="price">$8.500 COP</span>
+                </div>
+                <div class="menu-item" onclick="addToCart('Helado', 7000)">
+                    <img src="/api/placeholder/400/300" alt="Helado">
+                    <h3>Helado</h3>
+                    <p>Tres bolas de diferentes sabores con topping</p>
+                    <span class="price">$7.000 COP</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toggle-cart" onclick="toggleCart()">🛒</div>
+
+    <div class="cart-overlay" onclick="closeCart()"></div>
+    
+    <div class="cart">
+        <div class="cart-title">
+            <h2>Pedido - Mesa <span id="mesa-actual">-</span> (<span id="cliente-actual">-</span>)</h2>
+            <button class="close-cart" onclick="closeCart()">×</button>
+        </div>
+        <div class="cart-items"></div>
+        
+        <div class="cart-total">Total: $0.0</div>
+        <button class="boton" onclick="Enviar()">Enviar</button>
+    </div>
+
+    <script src="main.js"></script>
+    <script src="ConexionBase/Agregar.js"></script>
+</body>
+</html>
