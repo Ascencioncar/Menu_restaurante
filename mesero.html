@@ -9,8 +9,8 @@
 </head>
 <body>
     <header>
-        <h1>Nuestro Menú</h1>
-        <p>Seleccione sus platos favoritos</p>
+        <h1>Pedido de clientes</h1>
+        <p>Seleccione los platos de los clientes</p>
     </header>
 
     <div class="container">
@@ -34,13 +34,13 @@
             <div class="menu-section">
                 <h2 class="section-title">Entradas</h2>
                 <div class="menu-item" onclick="addToCart('Ensalada César', 15000)">
-                    <img src="/Assets/cesar.png" alt="Ensalada César" >
+                    <img src="public/Assets/cesar.png" alt="Ensalada César" >
                     <h3>Ensalada César</h3>
                     <p>Lechuga romana fresca con aderezo César, crotones y queso parmesano</p>
                     <span class="price">$15.000 COP</span>
                 </div>
                 <div class="menu-item" onclick="addToCart('Sopa del Día', 12000)">
-                    <img src="/api/placeholder/400/300" alt="Sopa del Día">
+                    <img src="public/Assets/sopa.jpg" alt="Sopa del Día">
                     <h3>Sopa del Día</h3>
                     <p>Preparada con ingredientes frescos del día</p>
                     <span class="price">$12.000 COP</span>
@@ -50,13 +50,13 @@
             <div class="menu-section">
                 <h2 class="section-title">Platos Principales</h2>
                 <div class="menu-item" onclick="addToCart('Hamburguesa Clásica', 18000)">
-                    <img src="/Assets/hamburguesa.webp" alt="Hamburguesa Clásica">
+                    <img src="public/Assets/hamburguesa.webp" alt="Hamburguesa Clásica">
                     <h3>Hamburguesa Clásica</h3>
                     <p>Carne de res, queso cheddar, lechuga, tomate y cebolla</p>
                     <span class="price">$18.000 C0P</span>
                 </div>
                 <div class="menu-item" onclick="addToCart('Pasta Alfredo', 11000)">
-                    <img src="/api/placeholder/400/300" alt="Pasta Alfredo">
+                    <img src="/public/Assets/pasta.jpeg" alt="Pasta Alfredo">
                     <h3>Pasta Alfredo</h3>
                     <p>Fettuccine en salsa cremosa con parmesano</p>
                     <span class="price">$11.000 COP</span>
@@ -66,13 +66,13 @@
             <div class="menu-section">
                 <h2 class="section-title">Postres</h2>
                 <div class="menu-item" onclick="addToCart('Tiramisú', 8500)">
-                    <img src="/api/placeholder/400/300" alt="Tiramisú">
+                    <img src="public/Assets/tiramisu.jpg" alt="Tiramisú">
                     <h3>Tiramisú</h3>
                     <p>Postre italiano tradicional con café y mascarpone</p>
                     <span class="price">$8.500 COP</span>
                 </div>
                 <div class="menu-item" onclick="addToCart('Helado', 7000)">
-                    <img src="/api/placeholder/400/300" alt="Helado">
+                    <img src="public/Assets/helado.webp" alt="Helado">
                     <h3>Helado</h3>
                     <p>Tres bolas de diferentes sabores con topping</p>
                     <span class="price">$7.000 COP</span>
@@ -94,6 +94,7 @@
         
         <div class="cart-total">Total: $0.0</div>
         <button class="boton" onclick="Enviar()">Enviar</button>
+        <input type="text" id="mesa" class="cliente-input" placeholder="Comentario" >
     </div>
 
     <script src="main.js"></script>

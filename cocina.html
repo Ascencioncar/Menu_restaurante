@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cocina - Gestión de Pedidos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filters {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .order-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .order-time {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .order-items {
+            margin-bottom: 15px;
+        }
+
+        .order-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        .order-item-comment {
+            font-size: 0.9em;
+            color: #666;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .order-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background-color: #f1c40f;
+            color: #fff;
+        }
+
+        .status-in-progress {
+            background-color: #3498db;
+            color: #fff;
+        }
+
+        .status-completed {
+            background-color: #2ecc71;
+            color: #fff;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .btn-complete {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .btn-progress {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .no-orders {
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: 10px;
+            grid-column: 1 / -1;
+        }
+
+        .order-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .orders-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Cocina - Gestión de Pedidos</h1>
+    </div>
+
+    <div class="filters">
+        <h2>Filtros</h2>
+        <div class="filters-grid">
+            <div class="filter-group">
+                <label>Fecha Desde:</label>
+                <input type="date" id="dateFrom" onchange="aplicarFiltros()">
+            </div>
+            <div class="filter-group">
+                <label>Fecha Hasta:</label>
+                <input type="date" id="dateTo" onchange="aplicarFiltros()">
+            </div>
+            <div class="filter-group">
+                <label>Estado:</label>
+                <select id="statusFilter" onchange="aplicarFiltros()">
+                    <option value="todos">Todos</option>
+                    <option value="pendiente">Pendientes</option>
+                    <option value="en-proceso">En Proceso</option>
+                    <option value="completado">Completados</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Mesa:</label>
+                <select id="tableFilter" onchange="aplicarFiltros()">
+                    <option value="todas">Todas</option>
+                    <option value="1">Mesa 1</option>
+                    <option value="2">Mesa 2</option>
+                    <option value="3">Mesa 3</option>
+                    <option value="4">Mesa 4</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="orders-grid" id="ordersContainer">
+        <!-- Los pedidos se cargarán dinámicamente aquí -->
+    </div>
+
+    <script>
+        // Datos de ejemplo para simular pedidos
+        let pedidos = [];
+        
+        // Función para inicializar datos de ejemplo
+        function inicializarDatosEjemplo() {
+            const ahora = new Date();
+            pedidos = [
+                {
+                    id: 1,
+                    mesa: 1,
+                    cliente: "Juan Pérez",
+                    fecha: new Date(ahora - 1000 * 60 * 30).toISOString(), // 30 minutos atrás
+                    estado: "pendiente",
+                    items: [
+                        { nombre: "Hamburguesa Clásica", cantidad: 2, comentario: "Sin cebolla" },
+                        { nombre: "Papas Fritas", cantidad: 1, comentario: "Extra crocantes" }
+                    ]
+                },
+                {
+                    id: 2,
+                    mesa: 2,
+                    cliente: "María García",
+                    fecha: new Date(ahora - 1000 * 60 * 15).toISOString(), // 15 minutos atrás
+                    estado: "en-proceso",
+                    items: [
+                        { nombre: "Pasta Alfredo", cantidad: 1, comentario: "Sin pimienta" }
+                    ]
+                }
+                // Puedes agregar más pedidos de ejemplo aquí
+            ];
+            actualizarVisualizacion();
+        }
+
+        function actualizarEstado(pedidoId, nuevoEstado) {
+            const pedido = pedidos.find(p => p.id === pedidoId);
+            if (pedido) {
+                pedido.estado = nuevoEstado;
+                actualizarVisualizacion();
+            }
+        }
+
+        function aplicarFiltros() {
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            const status = document.getElementById('statusFilter').value;
+            const table = document.getElementById('tableFilter').value;
+
+            let pedidosFiltrados = [...pedidos];
+
+            if (dateFrom) {
+                pedidosFiltrados = pedidosFiltrados.filter(pedido => 
+                    new Date(pedido.fecha) >= new Date(dateFrom)
+                );
+            }
+
+            if (dateTo) {
+                pedidosFiltrados = pedidosFiltrados.filter(pedido => 
+                    new Date(pedido.fecha) <= new Date(dateTo + 'T23:59:59')
+                );
+            }
+
+            if (status !== 'todos') {
+                pedidosFiltrados = pedidosFiltrados.filter(pedido => 
+                    pedido.estado === status
+                );
+            }
+
+            if (table !== 'todas') {
+                pedidosFiltrados = pedidosFiltrados.filter(pedido => 
+                    pedido.mesa === parseInt(table)
+                );
+            }
+
+            actualizarVisualizacion(pedidosFiltrados);
+        }
+
+        function actualizarVisualizacion(pedidosMostrar = pedidos) {
+            const container = document.getElementById('ordersContainer');
+            
+            if (pedidosMostrar.length === 0) {
+                container.innerHTML = `
+                    <div class="no-orders">
+                        <h3>No hay pedidos que coincidan con los filtros</h3>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = pedidosMostrar.map(pedido => `
+                <div class="order-card">
+                    <div class="order-header">
+                        <h3>Pedido #${pedido.id}</h3>
+                        <span class="status-badge status-${pedido.estado}">
+                            ${pedido.estado.toUpperCase()}
+                        </span>
+                    </div>
+                    <div class="order-meta">
+                        <span>Mesa ${pedido.mesa}</span>
+                        <span>Cliente: ${pedido.cliente}</span>
+                    </div>
+                    <div class="order-time">
+                        ${new Date(pedido.fecha).toLocaleString()}
+                    </div>
+                    <div class="order-items">
+                        ${pedido.items.map(item => `
+                            <div class="order-item">
+                                <strong>${item.cantidad}x ${item.nombre}</strong>
+                                ${item.comentario ? `
+                                    <div class="order-item-comment">
+                                        Nota: ${item.comentario}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="order-actions">
+                        ${pedido.estado === 'pendiente' ? `
+                            <button class="action-btn btn-progress" onclick="actualizarEstado(${pedido.id}, 'en-proceso')">
+                                Iniciar Preparación
+                            </button>
+                        ` : pedido.estado === 'en-proceso' ? `
+                            <button class="action-btn btn-complete" onclick="actualizarEstado(${pedido.id}, 'completado')">
+                                Marcar Completado
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Inicializar la aplicación
+        inicializarDatosEjemplo();
+    </script>
+</body>
+</html>

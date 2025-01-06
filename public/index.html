@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingresar</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f3f4f6;
+            font-family: Arial, sans-serif;
+        }
+
+        .login-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .logo {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+        }
+
+        .login-title {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 0.5rem;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo-container">
+            <img src="Assets/Logo.png" alt="Logo" class="logo">
+        </div>
+        <h2 class="login-title">Login</h2>
+        <form id="login-form">
+            <div class="form-group">
+                <input type="text" id="Usuario" placeholder="Usuario" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="Contraseña" placeholder="Contraseña" required>
+            </div>
+            <button type="submit">Ingresar</button>
+        </form>
+        <div id="response-message" style="text-align: center; margin-top: 1rem; color: red;"></div>
+    </div>
+    <script>
+        // El script corregido
+        document.getElementById("login-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const username = document.getElementById("Usuario").value;
+            const password = document.getElementById("Contraseña").value;
+
+            try {
+                const response = await fetch("http://localhost:3000/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                const data = await response.json();
+                console.log("Respuesta del servidor:", data);
+
+                const messageEl = document.getElementById("response-message");
+                if (data.success) {
+                    messageEl.style.color = "green";
+                    messageEl.textContent = "¡Inicio de sesión exitoso!";
+                    if (data.rol === 1) {
+                        alert("Acceso como Administrador");
+                    } else {
+                        alert("Acceso como Usuario");
+                    }
+                } else {
+                    messageEl.style.color = "red";
+                    messageEl.textContent = data.message;
+                }
+            } catch (error) {
+                console.error("Error al enviar la solicitud:", error);
+            }
+        });
+    </script>
+</body>
+</html>
