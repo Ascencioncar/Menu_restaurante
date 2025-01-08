@@ -1,35 +1,68 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const fs = require("fs");
-const path = require("path");
+const express = require('express');
+const { get } = require('express/lib/response');
+const { post } = require('express/lib/response');
+const { Pool } = require('pg');
+const cors = require('cors');
+const path = require('path');
+require('dotenv').config();
+
 
 const app = express();
-const PORT = 3000;
 
-// Middleware para manejar JSON
-app.use(bodyParser.json());
+// Middlewares
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Middleware para servir archivos estáticos
-app.use(express.static(path.join(__dirname, "public")));
+// Configuración de conexión a PostgreSQL
+const pool = new Pool({
+    user: process.env.PG_USER, // Usuario de la base de datos
+    host: process.env.PG_HOST, // Host del servidor
+    database: process.env.PG_DATABASE, // Nombre de la base de datos
+    password: process.env.PG_PASSWORD, // Contraseña
+    port: process.env.PG_PORT, // Puerto de conexión
+    ssl: {
+        rejectUnauthorized: false,
+      },
+});
 
-// Ruta para manejar el login
-app.post("/login", (req, res) => {
-    const { username, password } = req.body;
-    console.log("Solicitud entrante:", { username, password });
+// Ruta principal para servir login.html
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/login.html'));
+});
 
-    const users = JSON.parse(fs.readFileSync("users.json", "utf-8")).users;
+// Ruta para autenticar al usuario
+app.post('/login', async (req, res) => {
+    const { nombre, contraseña } = req.body;
 
-    const user = users.find(u => u.username === username && u.password === password);
+    try {
+        // Consulta para verificar credenciales
+        const result = await pool.query(
+            'SELECT id, nombre FROM usuario WHERE nombre = $1 AND contraseña = $2',
+            [nombre, contraseña]
+        );
 
-    if (user) {
-        console.log("Usuario encontrado:", user);
-        res.json({ success: true, rol: user.rol });
-    } else {
-        console.log("Credenciales incorrectas");
-        res.json({ success: false, message: "Credenciales incorrectas" });
+        if (result.rows.length > 0) {
+            // Usuario encontrado
+            const user = result.rows[0];
+            res.json({
+                success: true,
+                message: 'Login exitoso',
+                id: user.id,
+                nombre: user.nombre,
+            });
+        } else {
+            // Credenciales incorrectas
+            res.status(401).json({ success: false, message: 'Error de credenciales' });
+        }
+    } catch (error) {
+        console.error('Error en el login:', error);
+        res.status(500).json({ success: false, message: 'Error del servidor' });
     }
 });
-// Iniciar el servidor
+
+// Inicia el servidor
+const PORT = 3000;
 app.listen(PORT, () => {
-    console.log(`Servidor escuchando en http://localhost:${PORT}`);
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
