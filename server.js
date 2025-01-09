@@ -61,6 +61,27 @@ app.post('/login', async (req, res) => {
     }
 });
 
+
+app.post('/guardar-pedido', async (req, res) => {
+    const { mesa, cliente, items, total, comentario } = req.body;
+
+    try {
+        const fecha = new Date();
+        const query = `
+            INSERT INTO pedidos (mesa, cliente, items, total, comentario, fecha_pedido)
+            VALUES ($1, $2, $3, $4, $5, $6) RETURNING id
+        `;
+        const values = [mesa, cliente, JSON.stringify(items), total, comentario, fecha];
+
+        const result = await pool.query(query, values);
+        res.json({ success: true, message: 'Pedido guardado exitosamente', id: result.rows[0].id });
+    } catch (error) {
+        console.error('Error al guardar el pedido:', error);
+        res.status(500).json({ success: false, message: 'Error al guardar el pedido' });
+    }
+});
+
+
 // Inicia el servidor
 const PORT = 3000;
 app.listen(PORT, () => {

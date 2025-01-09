@@ -31,7 +31,10 @@ module.exports = { getUsuarios };
 
 async function getPedidos() {
     try {
-        const result = await pool.query('SELECT * FROM pedidos');
+        const result = await pool.query(`
+            SELECT * FROM pedidos
+        `);
+       
         return result.rows; // Devuelve un array con los registros
     } catch (error) {
         console.error('Error al consultar la tabla usuario:', error);
@@ -39,6 +42,20 @@ async function getPedidos() {
     }
 }
 
+async function SetPedidos() {
+    try {       
+        const result = await pool.query(`
+            insert into pedidos (cliente_nombre, mesa, productos, total, realizado) values ('pruebas', 6, 'Producto', '1000000', '0');
+        `);
+       
+        return result.rows; // Devuelve un array con los registros
+    } catch (error) {
+        console.error('Error al consultar la tabla usuario:', error);
+        throw error; // Lanza el error para manejarlo en otros niveles
+    }
+}
+
+SetPedidos();
 
 
 (async () => {

@@ -83,3 +83,45 @@
             cartTotal.textContent = `Total: $${mesa.total.toFixed(0)}`;
         }
   
+
+        async function Enviar() {
+            if (mesaActual === null) {
+                alert('Por favor, seleccione una mesa antes de enviar el pedido');
+                return;
+            }
+        
+            const mesa = mesaActual;
+            const cliente = pedidosPorMesa[mesa].cliente || 'Cliente desconocido';
+            const items = pedidosPorMesa[mesa].items;
+            const total = pedidosPorMesa[mesa].total;
+            const comentario = document.getElementById('mesa').value || '';
+        
+            if (items.length === 0) {
+                alert('El pedido está vacío, no se puede enviar.');
+                return;
+            }
+        
+            try {
+                const response = await fetch('http://localhost:3000/guardar-pedido', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mesa, cliente, items, total, comentario })
+                });
+        
+                const data = await response.json();
+        
+                if (data.success) {
+                    alert('¡Pedido enviado exitosamente!');
+                    // Reiniciar el pedido de la mesa actual
+                    pedidosPorMesa[mesa] = { items: [], total: 0, cliente };
+                    document.getElementById('mesa').value = '';
+                    updateCart();
+                } else {
+                    alert('Error al enviar el pedido: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error al enviar el pedido:', error);
+                alert('Ocurrió un error al conectar con el servidor.');
+            }
+        }
+        
