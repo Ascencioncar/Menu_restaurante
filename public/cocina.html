@@ -216,40 +216,37 @@
     </div>
 
     <script>
-        // Datos de ejemplo para simular pedidos
         let pedidos = [];
-        
-        // Función para inicializar datos de ejemplo
-        function inicializarDatosEjemplo() {
-            const ahora = new Date();
-            pedidos = [
-                {
-                    id: 1,
-                    mesa: 1,
-                    cliente: "Juan Pérez",
-                    fecha: new Date(ahora - 1000 * 60 * 30).toISOString(), // 30 minutos atrás
-                    estado: "pendiente",
-                    items: [
-                        { nombre: "Hamburguesa Clásica", cantidad: 2, comentario: "Sin cebolla" },
-                        { nombre: "Papas Fritas", cantidad: 1, comentario: "Extra crocantes" }
-                    ]
-                },
-                {
-                    id: 2,
-                    mesa: 2,
-                    cliente: "María García",
-                    fecha: new Date(ahora - 1000 * 60 * 15).toISOString(), // 15 minutos atrás
-                    estado: "en-proceso",
-                    items: [
-                        { nombre: "Pasta Alfredo", cantidad: 1, comentario: "Sin pimienta" }
-                    ]
-                }
-                // Puedes agregar más pedidos de ejemplo aquí
-            ];
-            actualizarVisualizacion();
+
+        async function obtenerPedidosDelServidor() {
+    try {
+        const respuesta = await fetch('/api/pedidos');
+        if (!respuesta.ok) {
+            throw new Error(`Error ${respuesta.status}: ${respuesta.statusText}`);
         }
+        const datos = await respuesta.json();
+        if (!Array.isArray(datos)) {
+            throw new Error('La respuesta no es un array de pedidos');
+        }
+        pedidos = datos;
+        actualizarVisualizacion();
+    } catch (error) {
+        console.error('Error al obtener los pedidos:', error.message);
+        document.getElementById('ordersContainer').innerHTML = `
+            <div class="no-orders">
+                <h3>Error al cargar los pedidos. Por favor, inténtelo más tarde.</h3>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+
+
 
         function actualizarEstado(pedidoId, nuevoEstado) {
+          
+
             const pedido = pedidos.find(p => p.id === pedidoId);
             if (pedido) {
                 pedido.estado = nuevoEstado;
@@ -293,61 +290,63 @@
         }
 
         function actualizarVisualizacion(pedidosMostrar = pedidos) {
-            const container = document.getElementById('ordersContainer');
-            
-            if (pedidosMostrar.length === 0) {
-                container.innerHTML = `
-                    <div class="no-orders">
-                        <h3>No hay pedidos que coincidan con los filtros</h3>
-                    </div>
-                `;
-                return;
-            }
+    const container = document.getElementById('ordersContainer');
+    
+    if (pedidosMostrar.length === 0) {
+        container.innerHTML = `
+            <div class="no-orders">
+                <h3>No hay pedidos que coincidan con los filtros</h3>
+            </div>
+        `;
+        return;
+    }
 
-            container.innerHTML = pedidosMostrar.map(pedido => `
-                <div class="order-card">
-                    <div class="order-header">
-                        <h3>Pedido #${pedido.id}</h3>
-                        <span class="status-badge status-${pedido.estado}">
-                            ${pedido.estado.toUpperCase()}
-                        </span>
-                    </div>
-                    <div class="order-meta">
-                        <span>Mesa ${pedido.mesa}</span>
-                        <span>Cliente: ${pedido.cliente}</span>
-                    </div>
-                    <div class="order-time">
-                        ${new Date(pedido.fecha).toLocaleString()}
-                    </div>
-                    <div class="order-items">
-                        ${pedido.items.map(item => `
-                            <div class="order-item">
-                                <strong>${item.cantidad}x ${item.nombre}</strong>
-                                ${item.comentario ? `
-                                    <div class="order-item-comment">
-                                        Nota: ${item.comentario}
-                                    </div>
-                                ` : ''}
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="order-actions">
-                        ${pedido.estado === 'pendiente' ? `
-                            <button class="action-btn btn-progress" onclick="actualizarEstado(${pedido.id}, 'en-proceso')">
-                                Iniciar Preparación
-                            </button>
-                        ` : pedido.estado === 'en-proceso' ? `
-                            <button class="action-btn btn-complete" onclick="actualizarEstado(${pedido.id}, 'completado')">
-                                Marcar Completado
-                            </button>
-                        ` : ''}
-                    </div>
+    container.innerHTML = pedidosMostrar.map(pedido => `
+        <div class="order-card">
+            <div class="order-header">
+                <h3>Pedido #${pedido.id}</h3>
+                <span class="status-badge status-${pedido.estado}">
+                    ${pedido.estado.toUpperCase()}
+                </span>
+            </div>
+            <div class="order-meta">
+                <span>Mesa ${pedido.mesa}</span>
+                <span>Cliente: ${pedido.cliente}</span>
+            </div>
+            <div class="order-time">
+                ${new Date(pedido.fecha).toLocaleString()}
+            </div>
+           <div class="order-items">
+    ${(Array.isArray(pedido.items) ? pedido.items : []).map(item => `
+        <div class="order-item">
+            <strong>${item.cantidad}x ${item.nombre}</strong>
+            ${item.comentario !== undefined && item.comentario !== null && item.comentario.trim() !== '' ? `
+
+                <div class="order-item-comment">
+                    Nota: ${item.comentario}
                 </div>
-            `).join('');
-        }
+            ` : ''}
+        </div>
+    `).join('')}
+    </div>
+            <div class="order-actions">
+                ${pedido.estado === 'pendiente' ? `
+                    <button class="action-btn btn-progress" onclick="actualizarEstado(${pedido.id}, 'en-proceso')">
+                        Iniciar Preparación
+                    </button>
+                ` : pedido.estado === 'en-proceso' ? `
+                    <button class="action-btn btn-complete" onclick="actualizarEstado(${pedido.id}, 'completado')">
+                        Marcar Completado
+                    </button>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+}
 
-        // Inicializar la aplicación
-        inicializarDatosEjemplo();
+
+        // Inicializar la aplicación cargando los pedidos del servidor
+        obtenerPedidosDelServidor();
     </script>
 </body>
 </html>

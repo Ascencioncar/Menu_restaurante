@@ -65,6 +65,10 @@ app.post('/login', async (req, res) => {
 app.post('/guardar-pedido', async (req, res) => {
     const { mesa, cliente, items, total, comentario } = req.body;
 
+    if (!Array.isArray(items) || items.some(item => !item.nombre || !item.cantidad)) {
+        return res.status(400).json({ success: false, message: 'Estructura de items inválida' });
+    }
+
     try {
         const fecha = new Date();
         const query = `
@@ -80,6 +84,32 @@ app.post('/guardar-pedido', async (req, res) => {
         res.status(500).json({ success: false, message: 'Error al guardar el pedido' });
     }
 });
+
+
+
+// Simulación del endpoint en server.js
+app.get('/api/pedidos', async (req, res) => {
+    try {
+        const query = `
+            SELECT id, mesa, cliente, items, total, comentario, fecha_pedido AS fecha, estado
+            FROM pedidos
+            ORDER BY fecha_pedido DESC
+        `;
+        const result = await pool.query(query);
+
+        // Verificar y procesar items correctamente
+        const pedidos = result.rows.map(pedido => ({
+            ...pedido,
+            items: typeof pedido.items === 'string' ? JSON.parse(pedido.items || '[]') : pedido.items,
+        }));
+
+        res.json(pedidos);
+    } catch (error) {
+        console.error('Error al obtener los pedidos:', error); // Registrar el error exacto
+        res.status(500).json({ success: false, message: 'Error interno del servidor al obtener los pedidos.' });
+    }
+});
+
 
 
 // Inicia el servidor

@@ -51,37 +51,71 @@
                 alert('Por favor, seleccione una mesa primero');
                 return;
             }
-
-            pedidosPorMesa[mesaActual].items.push({ name, price });
-            pedidosPorMesa[mesaActual].total += price;
+        
+            const mesa = pedidosPorMesa[mesaActual];
+        
+            // Buscar si el producto ya existe en el carrito
+            const existingItem = mesa.items.find(item => item.nombre === name);
+            if (existingItem) {
+                // Incrementar la cantidad
+                const cantidad = prompt(`Ya tienes ${existingItem.cantidad} de "${name}". ¿Cuántas más quieres agregar?`, 1);
+                if (!cantidad || isNaN(cantidad) || cantidad <= 0) {
+                    alert('Cantidad inválida');
+                    return;
+                }
+                existingItem.cantidad += parseInt(cantidad);
+                mesa.total += price * parseInt(cantidad);
+            } else {
+                // Agregar un nuevo producto al carrito
+                const cantidad = prompt(`¿Cuántas unidades de "${name}" desea agregar?`, 1);
+                if (!cantidad || isNaN(cantidad) || cantidad <= 0) {
+                    alert('Cantidad inválida');
+                    return;
+                }
+                mesa.items.push({ nombre: name, precio: price, cantidad: parseInt(cantidad) });
+                mesa.total += price * parseInt(cantidad);
+            }
+        
             updateCart();
         }
+        
+
+        
+
 
         function removeFromCart(index) {
             const mesa = pedidosPorMesa[mesaActual];
-            mesa.total -= mesa.items[index].price;
+        
+            // Restar el precio total del artículo (precio * cantidad)
+            mesa.total -= mesa.items[index].precio * mesa.items[index].cantidad;
+        
+            // Eliminar el artículo del carrito
             mesa.items.splice(index, 1);
+        
             updateCart();
         }
-
+        
         function updateCart() {
             if (mesaActual === null) return;
-
+        
             const mesa = pedidosPorMesa[mesaActual];
             const cartItems = document.querySelector('.cart-items');
             const cartTotal = document.querySelector('.cart-total');
-            
+        
+            // Generar el HTML para los items en el carrito
             cartItems.innerHTML = mesa.items.map((item, index) => `
                 <div class="cart-item">
-                    <span>${item.name}</span>
-                    <span>$${item.price.toFixed(2)} 
+                    <span>${item.nombre} x${item.cantidad}</span>
+                    <span>$${(item.precio * item.cantidad).toFixed(2)} 
                         <button onclick="removeFromCart(${index})">×</button>
                     </span>
                 </div>
             `).join('');
-            
+        
+            // Actualizar el total
             cartTotal.textContent = `Total: $${mesa.total.toFixed(0)}`;
         }
+        
   
 
         async function Enviar() {
@@ -92,9 +126,13 @@
         
             const mesa = mesaActual;
             const cliente = pedidosPorMesa[mesa].cliente || 'Cliente desconocido';
-            const items = pedidosPorMesa[mesa].items;
+            const items = pedidosPorMesa[mesa].items.map(item => ({
+                nombre: item.nombre,
+                precio: item.precio,
+                cantidad: item.cantidad,
+            }));
             const total = pedidosPorMesa[mesa].total;
-            const comentario = document.getElementById('mesa').value || '';
+            const comentario = document.getElementById('comentario').value || '';
         
             if (items.length === 0) {
                 alert('El pedido está vacío, no se puede enviar.');
@@ -112,9 +150,8 @@
         
                 if (data.success) {
                     alert('¡Pedido enviado exitosamente!');
-                    // Reiniciar el pedido de la mesa actual
                     pedidosPorMesa[mesa] = { items: [], total: 0, cliente };
-                    document.getElementById('mesa').value = '';
+                    document.getElementById('comentario').value = '';
                     updateCart();
                 } else {
                     alert('Error al enviar el pedido: ' + data.message);
@@ -124,4 +161,5 @@
                 alert('Ocurrió un error al conectar con el servidor.');
             }
         }
+        
         
